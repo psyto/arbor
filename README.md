@@ -1,5 +1,23 @@
 # ZK Compression and the Reconstruction of the Privacy Ecosystem on Solana: A Strategic Outlook for Solopreneurs Centered on Light Protocol
 
+## Quick Start - Proof of Concept
+
+This repository now includes a working proof of concept for private airdrops:
+
+- **[SETUP.md](./SETUP.md)** - Installation and configuration guide
+- **[DEMO.md](./DEMO.md)** - Complete demo walkthrough with examples
+- **[TECHSPEC.md](./TECHSPEC.md)** - Technical specification for Shielded State Middleware
+
+```bash
+npm install
+cp .env.example .env
+# Edit .env with your configuration
+npm run build
+npm run example:airdrop
+```
+
+---
+
 Since its inception, the Solana blockchain has pursued the pinnacle of monolithic design, leveraging low latency and high throughput. However, as the network matures, it faces the structural challenge of **"State Bloat,"** which drives up RAM costs for validators. **ZK Compression (Zero-Knowledge Compression)**, co-developed by **Light Protocol** and **Helius**, has emerged as the definitive solution to this issue.
 
 Originally conceived as a privacy-focused shielded transfer protocol, Light Protocol pivoted its underlying technology toward a scaling solution in early 2024. This shift is more than a product change; it represents a new architecture that integrates **"Scalability"** and **"Privacy"** as inseparable elements at Solana’s base layer.

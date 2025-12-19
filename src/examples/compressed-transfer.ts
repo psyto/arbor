@@ -86,6 +86,33 @@ async function main() {
     console.log('✓ Compressed tokens minted!');
     console.log(`Signature: ${mintSig}\n`);
 
+    // Wait for Photon indexer to process the mint
+    console.log('Waiting for indexer to process mint...');
+    let balanceBefore = BigInt(0);
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    while (balanceBefore === BigInt(0) && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      balanceBefore = await getCompressedBalance(lightRpc, recipient.publicKey, mint);
+      attempts++;
+      if (balanceBefore === BigInt(0)) {
+        process.stdout.write('.');
+      } else {
+        console.log('\n✓ Tokens indexed!\n');
+      }
+    }
+
+    if (balanceBefore === BigInt(0)) {
+      console.log('\n⚠️  Indexer did not pick up tokens within timeout');
+      console.log('This is normal on devnet - indexer can be slow');
+      console.log('\nYou can verify the mint on Solana Explorer:');
+      console.log(`https://explorer.solana.com/tx/${mintSig}?cluster=devnet\n`);
+      return;
+    }
+
+    console.log(`Recipient 1 balance: ${balanceBefore.toString()}\n`);
+
     // Now transfer those tokens to another address
     const recipient2 = Keypair.generate();
     const transferAmount = BigInt(50000); // Transfer half

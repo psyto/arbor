@@ -10,6 +10,8 @@ import {
   createTransferInstruction,
   getOrCreateAssociatedTokenAccount,
 } from '@solana/spl-token';
+import { Rpc } from '@lightprotocol/stateless.js';
+import { transferCompressed, ensureTokenPool } from './compressed-account';
 import { AirdropRecipient, AirdropResult, AirdropConfig } from '../types';
 
 /**
@@ -24,10 +26,17 @@ import { AirdropRecipient, AirdropResult, AirdropConfig } from '../types';
 export class PrivateAirdrop {
   private connection: Connection;
   private config: AirdropConfig;
+  private lightRpc?: Rpc;
 
-  constructor(connection: Connection, config: AirdropConfig) {
+  constructor(connection: Connection, config: AirdropConfig, lightRpc?: Rpc) {
     this.connection = connection;
     this.config = config;
+    this.lightRpc = lightRpc;
+
+    // If compression is enabled, lightRpc is required
+    if (config.useCompression && !lightRpc) {
+      throw new Error('Light Protocol RPC is required when useCompression is true');
+    }
   }
 
   /**
@@ -116,23 +125,71 @@ export class PrivateAirdrop {
 
   /**
    * Processes batch using ZK compressed transfers
-   * This is a placeholder for the full ZK Compression implementation
+   * This uses Light Protocol to transfer compressed tokens with privacy
    */
   private async processCompressedBatch(
     recipients: AirdropRecipient[]
   ): Promise<AirdropResult[]> {
-    console.log('ZK Compression mode - This requires full Light Protocol integration');
-    console.log('Implementation steps:');
-    console.log('1. Compress source tokens into a shielded pool');
-    console.log('2. For each recipient:');
-    console.log('   - Fetch current Merkle proof from Photon RPC');
-    console.log('   - Generate ZK proof for the transfer');
-    console.log('   - Submit compressed transaction (128 bytes proof)');
-    console.log('3. Nullify old states and create new compressed accounts');
+    if (!this.lightRpc) {
+      throw new Error('Light RPC not initialized for compressed transfers');
+    }
 
-    // For now, fall back to standard transfers
-    console.log('\nFalling back to standard transfers for this demo...');
-    return this.processStandardBatch(recipients);
+    const results: AirdropResult[] = [];
+
+    console.log('Using ZK Compression for private transfers');
+    console.log('Each transfer:');
+    console.log('  - Fetches Merkle proofs from Photon API');
+    console.log('  - Generates ZK proofs client-side');
+    console.log('  - Submits only 128 bytes on-chain\n');
+
+    // Ensure token pool exists for this mint
+    try {
+      await ensureTokenPool(
+        this.lightRpc,
+        this.config.authorityKeypair,
+        this.config.mint
+      );
+    } catch (error) {
+      console.log(`Token pool check: ${error}`);
+    }
+
+    // Process each recipient with compressed transfers
+    for (const recipient of recipients) {
+      try {
+        const signature = await transferCompressed(
+          this.lightRpc,
+          this.config.authorityKeypair,  // payer
+          this.config.authorityKeypair,  // owner
+          recipient.address,
+          this.config.mint,
+          recipient.amount
+        );
+
+        results.push({
+          signature,
+          recipient: recipient.address,
+          amount: recipient.amount,
+          success: true,
+        });
+
+        console.log(`✓ Sent ${recipient.amount} compressed to ${recipient.address.toBase58().slice(0, 8)}...`);
+      } catch (error) {
+        results.push({
+          signature: '',
+          recipient: recipient.address,
+          amount: recipient.amount,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
+
+        console.log(`✗ Failed for ${recipient.address.toBase58().slice(0, 8)}...: ${error}`);
+      }
+
+      // Add small delay between transfers
+      await this.delay(500);
+    }
+
+    return results;
   }
 
   /**

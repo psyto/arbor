@@ -2,18 +2,28 @@
 
 ## Quick Start - Proof of Concept
 
-This repository now includes a working proof of concept for private airdrops:
+This repository includes a working implementation of private airdrops with ZK Compression:
 
 - **[SETUP.md](./SETUP.md)** - Installation and configuration guide
 - **[DEMO.md](./DEMO.md)** - Complete demo walkthrough with examples
+- **[PHASE2.md](./PHASE2.md)** - **NEW!** ZK Compression integration guide
 - **[TECHSPEC.md](./TECHSPEC.md)** - Technical specification for Shielded State Middleware
 
+### Standard SPL Airdrop (Working)
 ```bash
 npm install
 cp .env.example .env
 # Edit .env with your configuration
 npm run build
 npm run example:airdrop
+```
+
+### ZK Compressed Airdrop (Phase 2 - Ready to Test)
+```bash
+# Get free Helius API key from https://www.helius.dev/
+# Add to PHOTON_RPC_URL in .env
+npm run example:transfer  # Test compressed transfers
+# See PHASE2.md for full guide
 ```
 
 ---

@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Rpc } from '@lightprotocol/stateless.js';
+import { Rpc, createRpc } from '@lightprotocol/stateless.js';
 import { NetworkConfig } from '../types';
 
 /**
@@ -11,14 +11,19 @@ export function createConnection(config: NetworkConfig): Connection {
 
 /**
  * Creates a Light Protocol RPC connection for compressed state
- * Note: This requires proper Light Protocol setup with correct constructor params
+ * This enables ZK compression features like compressed token transfers
  */
-export function createLightRpc(config: NetworkConfig): any {
-  const photonUrl = config.photonRpcUrl || config.rpcUrl;
-  // Placeholder - actual Rpc constructor requires specific parameters
-  // See Light Protocol docs for proper initialization
-  console.warn('Light Protocol RPC not fully configured - see SETUP.md');
-  return null;
+export function createLightRpc(config: NetworkConfig): Rpc {
+  const compressionApiEndpoint = config.photonRpcUrl || config.rpcUrl;
+
+  // Create Light Protocol RPC with compression API endpoint
+  // The Photon RPC provides Merkle proofs and compressed account indexing
+  const rpc = createRpc(
+    config.rpcUrl,           // Standard Solana RPC
+    compressionApiEndpoint    // Photon API for compression
+  );
+
+  return rpc;
 }
 
 /**

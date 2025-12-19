@@ -56,7 +56,7 @@ async function main() {
   // In production, you'd load this from a CSV or database
   const recipients: AirdropRecipient[] = [
     {
-      address: new PublicKey('11111111111111111111111111111111'), // Replace with real addresses
+      address: new PublicKey('AthWrtSNbNo7FzhVK4JjbKYFkX7QjpZvLUD4mncfpATc'),
       amount: BigInt(1000000), // 1 token (assuming 6 decimals)
       metadata: {
         label: 'Early Adopter',
@@ -64,11 +64,19 @@ async function main() {
       },
     },
     {
-      address: new PublicKey('11111111111111111111111111111112'),
+      address: new PublicKey('8Gj8m3x9jVrRvx7vWtnEuyp9EA9DDXTc5QeyGnn5ZaYr'),
       amount: BigInt(500000), // 0.5 tokens
       metadata: {
         label: 'Active User',
         eligibilityReason: 'Transaction count > 100',
+      },
+    },
+    {
+      address: new PublicKey('fDnacNwRzUXa4rX1feMR1QvYzQgS6yz8cnpzDpFXTQH'),
+      amount: BigInt(2500000), // 2.5 tokens
+      metadata: {
+        label: 'Power User',
+        eligibilityReason: 'Top 10% by volume',
       },
     },
   ];
